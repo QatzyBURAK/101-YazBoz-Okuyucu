@@ -1,7 +1,6 @@
 {
   "functions": {
     "api/analyze.py": {
-      "runtime": "python3.12",
       "memory": 512,
       "maxDuration": 30
     }
