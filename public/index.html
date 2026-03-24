@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Okey Yazboz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    .upload-area {
+      width: 100%;
+      max-width: 480px;
+      border: 2px dashed #444;
+      border-radius: 16px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      background: #1a1a1a;
+      margin-bottom: 16px;
+    }
+
+    .upload-area:hover { border-color: #f5a623; }
+
+    .upload-area.has-image { border-color: #f5a623; border-style: solid; }
+
+    .upload-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+    .upload-area p { color: #aaa; font-size: 0.95rem; }
+
+    #fileInput { display: none; }
+
+    #preview {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 12px;
+      display: none;
+      margin-bottom: 16px;
+      border: 2px solid #333;
+    }
+
+    .btn {
+      width: 100%;
+      max-width: 480px;
+      padding: 14px;
+      background: #f5a623;
+      color: #000;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 24px;
+    }
+
+    .btn:hover { background: #e09518; }
+    .btn:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+    .loader {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      color: #aaa;
+    }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #333;
+      border-top-color: #f5a623;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .results { width: 100%; max-width: 480px; display: none; }
+
+    .winner-card {
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .winner-card.TU { background: linear-gradient(135deg, #1a3a5c, #2a5298); }
+    .winner-card.KB { background: linear-gradient(135deg, #3a1a1a, #8b2222); }
+    .winner-card.BERA { background: linear-gradient(135deg, #1a3a1a, #2a6b2a); }
+
+    .winner-label { font-size: 0.85rem; color: #ccc; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 2px; }
+    .winner-name { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+    .winner-fark { font-size: 0.9rem; color: #ccc; }
+
+    .scores-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .score-card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #2a2a2a;
+    }
+
+    .score-card .team { font-size: 0.8rem; color: #aaa; margin-bottom: 4px; }
+    .score-card .score { font-size: 2rem; font-weight: 700; }
+    .score-card.TU .score { color: #5b9bd5; }
+    .score-card.KB .score { color: #e05555; }
+
+    .games-title {
+      font-size: 0.85rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .game-row {
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #2a2a2a;
+    }
+
+    .game-row .game-num { color: #666; font-size: 0.85rem; }
+    .game-row .game-scores { display: flex; gap: 16px; }
+    .game-row .tu { color: #5b9bd5; font-weight: 600; }
+    .game-row .kb { color: #e05555; font-weight: 600; }
+
+    .error-box {
+      width: 100%;
+      max-width: 480px;
+      background: #2a1a1a;
+      border: 1px solid #8b2222;
+      border-radius: 12px;
+      padding: 16px;
+      color: #e05555;
+      display: none;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎯 Okey Yazboz</h1>
+  <p class="subtitle" id="subtitleText">Yazboz fotoğrafını yükle</p>
+
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-icon">📷</div>
+    <p>Yazboz fotoğrafını seç veya çek</p>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" />
+  </div>
+
+  <img id="preview" alt="Önizleme" />
+
+  <button class="btn" id="analyzeBtn" disabled onclick="analyze()">Analiz Et</button>
+
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <span>Yazboz okunuyor...</span>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="results" id="results">
+    <div class="winner-card" id="winnerCard">
+      <div class="winner-label">Önde Olan</div>
+      <div class="winner-name" id="winnerName"></div>
+      <div class="winner-fark" id="winnerFark"></div>
+    </div>
+
+    <div class="scores-grid">
+      <div class="score-card TU">
+        <div class="team" id="labelTU">Takım 1</div>
+        <div class="score" id="scoreTU">-</div>
+      </div>
+      <div class="score-card KB">
+        <div class="team" id="labelKB">Takım 2</div>
+        <div class="score" id="scoreKB">-</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const uploadArea = document.getElementById('uploadArea');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      preview.src = url;
+      preview.style.display = 'block';
+      uploadArea.classList.add('has-image');
+      analyzeBtn.disabled = false;
+    });
+
+    async function analyze() {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      document.getElementById('loader').style.display = 'flex';
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('errorBox').style.display = 'none';
+      analyzeBtn.disabled = true;
+
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        showResults(data);
+      } catch (err) {
+        const box = document.getElementById('errorBox');
+        box.textContent = 'Hata: ' + err.message;
+        box.style.display = 'block';
+      } finally {
+        document.getElementById('loader').style.display = 'none';
+        analyzeBtn.disabled = false;
+      }
+    }
+
+    function showResults(data) {
+      const { takim1, takim2, toplam, one_cikan_kisa, fark, oyunlar } = data;
+
+      const t1 = takim1 || 'Takım 1';
+      const t2 = takim2 || 'Takım 2';
+
+      document.getElementById('subtitleText').textContent = t1 + ' vs ' + t2;
+      document.getElementById('labelTU').textContent = t1;
+      document.getElementById('labelKB').textContent = t2;
+      document.getElementById('scoreTU').textContent = toplam.TU;
+      document.getElementById('scoreKB').textContent = toplam.KB;
+
+      const winnerCard = document.getElementById('winnerCard');
+      winnerCard.className = 'winner-card ' + one_cikan_kisa;
+      document.getElementById('winnerName').textContent =
+        one_cikan_kisa === 'BERA' ? 'Beraberlik' :
+        one_cikan_kisa === 'TU' ? t1 : t2;
+      document.getElementById('winnerFark').textContent =
+        one_cikan_kisa === 'BERA' ? 'Berabere!' : fark + ' puan farkla önde';
+
+      const list = document.getElementById('gamesList');
+      list.innerHTML = '';
+      oyunlar.forEach(o => {
+        const row = document.createElement('div');
+        row.className = 'game-row';
+        row.innerHTML = `
+          <span class="game-num">${o.sutun}. Oyun</span>
+          <span class="game-scores">
+            <span class="tu">${t1}: ${o.TU_toplam}</span>
+            <span class="kb">${t2}: ${o.KB_toplam}</span>
+          </span>
+        `;
+        list.appendChild(row);
+      });
+
+      document.getElementById('results').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
