@@ -1,5 +1,7 @@
 # 🎯 Okey Yazboz Okuyucu
 
+**🌐 Canlı Demo:** [101-yaz-boz-okuyucu.vercel.app](https://101-yaz-boz-okuyucu.vercel.app)
+
 El yazısıyla yazılmış Okey yazboz kağıdının fotoğrafını yükle, yapay zeka puanları otomatik okusun ve hesaplasın.
 
 ## Nasıl Çalışır?
